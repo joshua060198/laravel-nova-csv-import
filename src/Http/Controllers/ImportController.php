@@ -27,6 +27,16 @@ class ImportController
         $this->importer = new $class;
     }
 
+    public function prevfiles(NovaRequest $request)
+    {
+        $files = Storage::files("csv-import/tmp/");
+        $result = [];
+        foreach ($files as $file) {
+            array_push($result, date('m/d/Y H:i:s', Storage::lastModified($file)) . " | " . basename($file));
+        }
+        return response()->json(['prevfiles' => $result]);
+    }
+
     public function preview(NovaRequest $request, $file)
     {
         $import = $this->importer
@@ -130,7 +140,7 @@ class ImportController
 
     protected function getFilePath($file)
     {
-        return storage_path("nova/laravel-nova-import-csv/tmp/{$file}");
+        return storage_path("app/csv-import/tmp/{$file}");
     }
 
     private function responseError($error)
