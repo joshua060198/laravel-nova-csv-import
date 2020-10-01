@@ -15,4 +15,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/upload', 'UploadController@handle');
 Route::get('/preview/{file}', 'ImportController@preview');
+Route::get('/prevfiles', 'ImportController@prevfiles');
 Route::post('/import/{file}', 'ImportController@import');
+Route::post('/deleteallfiles', 'UploadController@deleteall');

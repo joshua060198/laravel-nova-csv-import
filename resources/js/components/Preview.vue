@@ -19,7 +19,7 @@
                 <div>
                     <select name="resource" class="block form-control form-select" v-model="resource">
                         <option value="">- Select a resource -</option>
-                        <option v-for="(label, index) in resources" :value="index">{{ label }}</option>
+                        <option v-for="(label, index) in resources" :value="index" v-bind:key="(label,index)">{{ label }}</option>
                     </select>
                 </div>
             </div>
@@ -27,20 +27,20 @@
             <table class="table w-full">
                 <thead>
                     <tr>
-                        <th v-for="heading in headings">{{ heading }}</th>
+                        <th v-for="heading in headings" v-bind:key="heading">{{ heading }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td v-for="heading in headings" class="text-center">
+                        <td v-for="heading in headings" v-bind:key="heading" class="text-center">
                             <select class="w-full form-control form-select" v-model="mappings[heading]">
                                 <option value="">- Ignore this column -</option>
-                                <option v-for="field in fields[resource]" :value="field.attribute">{{ field.name }}</option>
+                                <option v-for="field in fields[resource]" v-bind:key="field" :value="field.attribute">{{ field.name }}</option>
                             </select>
                         </td>
                     </tr>
-                    <tr v-for="row in rows">
-                        <td v-for="col in row">{{ col }}</td>
+                    <tr v-for="row in rows" v-bind:key="row">
+                        <td v-for="col in row" v-bind:key="col">{{ col }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -118,6 +118,7 @@ export default {
     methods: {
         runImport: function () {
             const self = this;
+            console.log(self);
 
             if (! this.hasValidConfiguration()) {
                 return;
