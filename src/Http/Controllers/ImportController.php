@@ -2,6 +2,8 @@
 
 namespace SimonHamp\LaravelNovaCsvImport\Http\Controllers;
 
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Nova;
 use Laravel\Nova\Resource;
 use Laravel\Nova\Rules\Relatable;
@@ -50,7 +52,7 @@ class ImportController
 
             $static_vars = (new \ReflectionClass((string) $resource))->getStaticProperties();
 
-            if(!isset($static_vars['canImportResource'])) {
+            if (!isset($static_vars['canImportResource'])) {
                 return true;
             }
 
@@ -98,7 +100,7 @@ class ImportController
             ->setModelClass($model_class)
             ->import($this->getFilePath($file), null);
 
-        if (! $this->importer->failures()->isEmpty() || ! $this->importer->errors()->isEmpty()) {
+        if (!$this->importer->failures()->isEmpty() || !$this->importer->errors()->isEmpty()) {
             return response()->json(['result' => 'failure', 'errors' => $this->importer->errors(), 'failures' => $this->importer->failures()]);
         }
 
@@ -109,7 +111,7 @@ class ImportController
     {
         return collect($resource::rulesForCreation($request))->mapWithKeys(function ($rule, $key) {
             foreach ($rule as $i => $r) {
-                if (! is_object($r)) {
+                if (!is_object($r)) {
                     continue;
                 }
 

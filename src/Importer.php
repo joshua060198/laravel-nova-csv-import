@@ -2,6 +2,7 @@
 
 namespace SimonHamp\LaravelNovaCsvImport;
 
+use Illuminate\Support\Facades\DB;
 use Laravel\Nova\Resource;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -125,6 +126,46 @@ class Importer implements ToModel, WithValidation, WithHeadingRow, WithBatchInse
         return $this;
     }
 
+    private function deleteBeforeImport($model_class = null)
+    {
+        $used_model = $model_class == null ? $this->model_class : $model_class;
+
+        if ($used_model != null) {
+            $used_model::truncate();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string|UploadedFile|null $filePath
+     * @param string|null              $disk
+     * @param string|null              $readerType
+     *
+     * @throws NoFilePathGivenException
+     * @return Importer|PendingDispatch
+     */
+    public function import($filePath = null, string $disk = null, string $readerType = null)
+    {
+        try {
+            DB::beginTransaction();
+            $this->deleteBeforeImport();
+            $filePath = $this->getFilePath($filePath);
+
+            $temp = $this->getImporter()->import(
+                $this,
+                $filePath,
+                $disk ?? $this->disk ?? null,
+                $readerType ?? $this->readerType ?? null
+            );
+
+            DB::commit();
+            return $temp;
+        } catch (\PDOException $e) {
+            DB::rollBack();
+        }
+    }
+
     private function mapRowDataToAttributes($row)
     {
         $data = [];
@@ -133,7 +174,7 @@ class Importer implements ToModel, WithValidation, WithHeadingRow, WithBatchInse
             $data[$field] = null;
 
             foreach ($this->attribute_map as $column => $attribute) {
-                if (! isset($row[$column]) || $field !== $attribute) {
+                if (!isset($row[$column]) || $field !== $attribute) {
                     continue;
                 }
 
